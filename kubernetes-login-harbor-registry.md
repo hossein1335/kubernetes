@@ -1,4 +1,4 @@
-# Kubernetes Secret for Harbor Registry Authentication
+# Kubernetes Secret for (Harbor) Registry Authentication
 
 This guide explains how to create a Kubernetes `Secret` of type `kubernetes.io/dockerconfigjson` to authenticate with a Harbor registry.
 
