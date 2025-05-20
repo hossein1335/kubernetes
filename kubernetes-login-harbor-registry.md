@@ -103,8 +103,76 @@ Save the YAML content to a file named `harbor-secret.yaml` and apply it to your 
 kubectl apply -f harbor-secret.yaml
 ```
 
+## Referencing the Secret in a Deployment
+
+To use the `harbor-secret` in a Kubernetes `Deployment`, add the `imagePullSecrets` field under the `spec` section (where `containers` is defined). This allows the Deployment to authenticate with the Harbor registry to pull images.
+
+Here’s an example of a complete `Deployment` YAML that references the `harbor-secret`:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rent-fast-api-deployment
+  labels:
+    app: rent-fast-api
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: rent-fast-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 2
+  template:
+    metadata:
+      labels:
+        app: rent-fast-api
+    spec:
+##add this line in your deployment ##
+      imagePullSecrets:
+        - name: harbor-secret
+####################################
+      containers:
+        - name: rent-fast-api
+          image: harbor.devvops.ir/new/rent-fast-api:latest
+          ports:
+            - containerPort: 8001
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+            requests:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            initialDelaySeconds: 50
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            initialDelaySeconds: 60
+            periodSeconds: 30
+```
+
+### Explanation
+
+- **imagePullSecrets**: This field references the `harbor-secret` created earlier, enabling Kubernetes to use the credentials to pull the `rent-fast-api` image from `harbor.devvops.ir`.
+- Save this YAML as `rent-fast-api-deployment.yaml` and apply it with:
+
+```bash
+kubectl apply -f rent-fast-api-deployment.yaml
+```
+
 ## Notes
 
 - Ensure the `auth` field in `config.json` is the base64-encoded `username:password` string.
 - Use the `-w 0` flag with the `base64` command to avoid line breaks in the output.
 - The `Secret` can be used in Kubernetes to pull images from the `harbor.devvops.ir` registry.
+- Verify that the `harbor-secret` exists in the same namespace as the `Deployment` before applying the Deployment YAML.
