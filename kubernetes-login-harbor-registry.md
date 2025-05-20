@@ -137,7 +137,7 @@ spec:
 ####################################
       containers:
         - name: rent-fast-api
-          image: harbor.devvops.ir/new/rent-fast-api:latest
+          image: registry/rent-fast-api:latest
           ports:
             - containerPort: 8001
           resources:
@@ -169,10 +169,3 @@ spec:
 ```bash
 kubectl apply -f rent-fast-api-deployment.yaml
 ```
-
-## Notes
-
-- Ensure the `auth` field in `config.json` is the base64-encoded `username:password` string.
-- Use the `-w 0` flag with the `base64` command to avoid line breaks in the output.
-- The `Secret` can be used in Kubernetes to pull images from the `harbor.devvops.ir` registry.
-- Verify that the `harbor-secret` exists in the same namespace as the `Deployment` before applying the Deployment YAML.
